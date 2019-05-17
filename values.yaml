@@ -1,0 +1,24 @@
+namespace: default
+name:
+  api: jmp-api
+  ui: jmp-ui
+
+port:
+  ws: 7001
+
+fs:
+  claimName:
+    api: django-jmp
+
+db:
+  driver: org.postgresql.Driver
+  url: jdbc:postgresql://jmp-db:5432/jmp
+
+app:
+  url: https://jmp.castive.dev
+  host: jmp.castive.dev
+
+image:
+  tag:
+    api: 0.4.11
+  pullSecret: regcred

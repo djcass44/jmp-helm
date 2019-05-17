@@ -1,0 +1,73 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ .Values.name.api }}
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.name.api }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.name.api }}
+    spec:
+      automountServiceAccountToken: false
+      #securityContext:
+      #  fsGroup: 1000
+      #  runAsUser: 1000
+      #  runAsGroup: 1000
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: {{ .Values.fs.claimName }}
+      containers:
+      - env:
+        - name: DRIVER_CLASS
+          value: {{ .Values.db.driver }}
+        - name: DRIVER_URL
+          value: {{ .Values.db.url }}
+        - name: DRIVER_USER
+          valueFrom:
+            secretKeyRef:
+              name: jmp-db
+              key: username
+        - name: DRIVER_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: jmp-db
+              key: password
+        - name: BASE_URL
+          value: {{ Values.app.url }}
+        - name: LOG_DIRECTORY
+          value: "/data"
+        - name: SOCKET_PORT
+          value: {{ .Values.port.ws }}
+        image: docker.castive.dev/jmp:{{ .Values.image.tag.api }}
+        imagePullPolicy: Always
+        name: {{ .Values.name.api }}
+        ports:
+        - containerPort: 7000
+        - containerPort: {{ .Values.port.ws }}
+        volumeMounts:
+        - mountPath: "/data"
+          name: data
+        readinessProbe:
+          httpGet:
+            path: /api/v2/version
+            port: 7000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        securityContext:
+          #runAsNonRoot: true
+          privileged: false
+          capabilities:
+            drop:
+              - all
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+      imagePullSecrets:
+      - name: {{ .Values.image.pullSecret }}
+      restartPolicy: Always
+status: {}
