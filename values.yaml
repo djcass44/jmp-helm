@@ -15,8 +15,8 @@ fs:
     api: django-jmp
 
 db:
-  driver: org.postgresql.Driver
-  url: jdbc:postgresql://jmp-db:5432/jmp
+  driver: org.sqlite.JDBC
+  url: jdbc:sqlite:/data/data.db
 
 app:
   url: https://jmp.castive.dev
