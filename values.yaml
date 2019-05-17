@@ -3,6 +3,10 @@ name:
   api: jmp-api
   ui: jmp-ui
 
+replicas:
+  api: 1
+  ui: 2
+
 port:
   ws: 7001
 
@@ -21,4 +25,5 @@ app:
 image:
   tag:
     api: 0.4.11
+    ui: 0.4.11
   pullSecret: regcred

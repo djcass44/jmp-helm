@@ -1,0 +1,36 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Values.name.api }}
+  namespace: {{ .Values.namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Values.name.api }}
+  ingress:
+  - from:
+    ports:
+    - protocol: TCP
+      port: 7000
+    - protocol: TCP
+      port: {{ .Values.port.ws }}
+  egress:
+  - to: {}
+  policyTypes:
+  - Egress
+  - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Values.name.ui }}
+  namespace: {{ .Values.namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Values.name.ui }}
+  ingress:
+  - from:
+    ports:
+    - protocol: TCP
+      port: 80
