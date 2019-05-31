@@ -4,13 +4,12 @@ metadata:
   labels:
     app: {{ .Values.name.api }}
   name: {{ .Values.name.api }}
-  namespace: {{ .Values.namespace }}
 spec:
   type: ClusterIP
   ports:
   - name: http
-    port: 7000
-    targetPort: 7000
+    port: {{ .Values.port.api }}
+    targetPort: {{ .Values.port.api }}
   - name: ws
     port: {{ .Values.port.ws }}
     targetPort: {{ .Values.port.ws }}
@@ -25,7 +24,6 @@ metadata:
   labels:
     app: {{ .Values.name.ui }}
   name: {{ .Values.name.ui }}
-  namespace: {{ .Values.namespace }}
 spec:
   type: ClusterIP
   ports:

@@ -2,7 +2,6 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: {{ .Values.name.api }}
-  namespace: {{ .Values.namespace }}
 spec:
   replicas: {{ .Values.replicas.api }}
   selector:
@@ -76,7 +75,6 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: {{ .Values.name.ui }}
-  namespace: {{ .Values.namespace }}
 spec:
   replicas: {{ .Values.replicas.ui }}
   strategy:

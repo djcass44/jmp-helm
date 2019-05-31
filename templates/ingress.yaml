@@ -2,7 +2,6 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: {{ .Values.name.api }}
-  namespace: {{ .Values.namespace }}
   annotations:
    ingress.kubernetes.io/ssl-redirect: true
 spec:
@@ -13,7 +12,7 @@ spec:
         - path: /api 
           backend:
             serviceName: http
-            servicePort: 7000
+            servicePort: {{ .Values.port.api }}
         - path: /socket.io
           backend:
             serviceName: ws
@@ -23,7 +22,6 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: {{ .Values.name.ui }}
-  namespace: {{ .Values.namespace }}
   annotations:
    ingress.kubernetes.io/ssl-redirect: true
 spec:

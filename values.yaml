@@ -8,6 +8,7 @@ replicas:
   ui: 2
 
 port:
+  api: 7000
   ws: 7001
 
 fs:

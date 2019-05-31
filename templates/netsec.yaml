@@ -2,7 +2,6 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: {{ .Values.name.api }}
-  namespace: {{ .Values.namespace }}
 spec:
   podSelector:
     matchLabels:
@@ -11,7 +10,7 @@ spec:
   - from:
     ports:
     - protocol: TCP
-      port: 7000
+      port: {{ .Values.port.api }}
     - protocol: TCP
       port: {{ .Values.port.ws }}
   egress:
@@ -24,7 +23,6 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: {{ .Values.name.ui }}
-  namespace: {{ .Values.namespace }}
 spec:
   podSelector:
     matchLabels:
