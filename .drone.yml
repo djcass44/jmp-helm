@@ -4,7 +4,7 @@ name: default
 steps:
   - name: publish
     image: djcass44/drone-helm-s3:latest
-    pull: true
+    pull: always
     settings:
       aws_access_key:
         from_secret: AWS_ACCESS_KEY
