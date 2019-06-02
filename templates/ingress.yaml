@@ -23,7 +23,7 @@ kind: Ingress
 metadata:
   name: {{ .Values.name.ui }}
   annotations:
-   ingress.kubernetes.io/ssl-redirect: true
+   ingress.kubernetes.io/ssl-redirect: "true"
 spec:
   rules:
   - host: {{ .Values.app.host }}
