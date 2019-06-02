@@ -42,7 +42,7 @@ spec:
         - name: LOG_DIRECTORY
           value: "/data"
         - name: SOCKET_PORT
-          value: {{ .Values.port.ws }}
+          value: {{ .Values.port.ws | quote }}
         image: "docker.castive.dev/jmp:{{ .Values.image.tag.api }}"
         imagePullPolicy: Always
         name: {{ .Values.name.api }}
