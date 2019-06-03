@@ -24,6 +24,10 @@ app:
   host: jmp.castive.dev
 
 image:
+  repository: core.harbor.castive.dev/jmp
+  image:
+    api: api
+    ui: ui
   tag:
     api: 0.4.11
     ui: 0.4.11

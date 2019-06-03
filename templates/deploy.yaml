@@ -43,7 +43,7 @@ spec:
           value: "/data"
         - name: SOCKET_PORT
           value: {{ .Values.port.ws | quote }}
-        image: "docker.castive.dev/jmp:{{ .Values.image.tag.api }}"
+        image: "{{ .Values.image.repository }}/{{ .Values.image.image.api }}:{{ .Values.image.tag.api }}"
         imagePullPolicy: Always
         name: {{ .Values.name.api }}
         ports:
@@ -102,7 +102,7 @@ spec:
       - name: tmp
         emptyDir: {}  
       containers:
-      - image: "docker.castive.dev/jmp-ui:{{ .Values.image.tag.ui }}"
+      - image: "{{ .Values.image.repository }}/{{ .Values.image.image.ui }}:{{ .Values.image.tag.ui }}"
         imagePullPolicy: Always
         name: {{ .Values.name.ui }}
         ports:
