@@ -11,11 +11,11 @@ spec:
       paths:
         - path: /api 
           backend:
-            serviceName: http
+            serviceName: {{ .Values.name.api }}
             servicePort: {{ .Values.port.api }}
         - path: /socket.io
           backend:
-            serviceName: ws
+            serviceName: {{ .Values.name.api }}
             servicePort: {{ .Values.port.ws }}
 ---
 apiVersion: extensions/v1beta1
@@ -31,5 +31,5 @@ spec:
       paths:
         - path: /
           backend:
-            serviceName: http
+            serviceName: {{ .Values.name.ui }}
             servicePort: 80
