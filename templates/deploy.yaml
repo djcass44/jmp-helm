@@ -20,7 +20,7 @@ spec:
       volumes:
       - name: data
         persistentVolumeClaim:
-          claimName: {{ .Values.fs.claimName }}
+          claimName: {{ .Values.fs.claimName.api }}
       containers:
       - env:
         - name: DRIVER_CLASS
