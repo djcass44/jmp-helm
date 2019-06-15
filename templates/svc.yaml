@@ -6,6 +6,7 @@ metadata:
   name: {{ .Values.name.api }}
 spec:
   type: ClusterIP
+  sessionAffinity: "ClientIP"
   ports:
   - name: http
     port: {{ .Values.port.api }}

@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Values.name.api }}
@@ -17,10 +17,12 @@ spec:
       #  fsGroup: 1000
       #  runAsUser: 1000
       #  runAsGroup: 1000
+      {{ if .Values.fs.claimName.api }}
       volumes:
       - name: data
         persistentVolumeClaim:
           claimName: {{ .Values.fs.claimName.api }}
+      {{ end }}
       containers:
       - env:
         - name: DRIVER_CLASS
@@ -47,15 +49,17 @@ spec:
         imagePullPolicy: Always
         name: {{ .Values.name.api }}
         ports:
-        - containerPort: 7000
+        - containerPort: {{ .Values.port.api }}
         - containerPort: {{ .Values.port.ws }}
+        {{ if .Values.fs.claimName.api }}
         volumeMounts:
         - mountPath: "/data"
           name: data
+        {{ end }}
         readinessProbe:
           httpGet:
             path: /api/v2/version
-            port: 7000
+            port: {{ .Values.port.api }}
           initialDelaySeconds: 5
           periodSeconds: 5
         securityContext:
@@ -70,7 +74,7 @@ spec:
       - name: {{ .Values.image.pullSecret }}
       restartPolicy: Always
 ---
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Values.name.ui }}
