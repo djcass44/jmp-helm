@@ -43,14 +43,13 @@ spec:
           value: {{ .Values.app.url }}
         - name: LOG_DIRECTORY
           value: "/data"
-        - name: SOCKET_PORT
-          value: {{ .Values.port.ws | quote }}
+        - name: JMP_HOME
+          value: "/data"
         image: "{{ .Values.image.repository }}/{{ .Values.image.image.api }}:{{ .Values.image.tag.api }}"
         imagePullPolicy: Always
         name: {{ .Values.name.api }}
         ports:
         - containerPort: {{ .Values.port.api }}
-        - containerPort: {{ .Values.port.ws }}
         {{ if .Values.fs.claimName.api }}
         volumeMounts:
         - mountPath: "/data"
@@ -58,12 +57,12 @@ spec:
         {{ end }}
         readinessProbe:
           httpGet:
-            path: /api/v2/version
+            path: /api/v3/health
             port: {{ .Values.port.api }}
           initialDelaySeconds: 5
           periodSeconds: 5
         securityContext:
-          #runAsNonRoot: true
+          runAsNonRoot: true
           privileged: false
           capabilities:
             drop:
@@ -99,10 +98,6 @@ spec:
       #   runAsUser: 1000
       #   runAsGroup: 1000
       volumes:
-      # - name: logs
-        # emptyDir: {}
-      - name: logs2
-        emptyDir: {}
       - name: tmp
         emptyDir: {}  
       containers:
@@ -112,26 +107,22 @@ spec:
         ports:
         - containerPort: 80
         volumeMounts:
-        # - name: logs
-          # mountPath: /var/lib/nginx
-        - name: logs2
-          mountPath: /var/log/nginx
         - name: tmp
           mountPath: /var/tmp/nginx
         livenessProbe:
           httpGet:
             path: /probe
-            port: 80
+            port: 8080
           initialDelaySeconds: 3
           periodSeconds: 3
         readinessProbe:
           httpGet:
             path: /probe
-            port: 80
+            port: 8080
           initialDelaySeconds: 5
           periodSeconds: 5
         securityContext:
-          # runAsNonRoot: true
+          runAsNonRoot: true
           privileged: false
           # capabilities:
             # drop:
@@ -139,7 +130,7 @@ spec:
             # add:
               # - CHOWN
               # - FOWNER
-          readOnlyRootFilesystem: false # this needs to be true
+          readOnlyRootFilesystem: false # this should be true
           allowPrivilegeEscalation: false
       imagePullSecrets:
       - name: {{ .Values.image.pullSecret }}

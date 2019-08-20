@@ -13,10 +13,6 @@ spec:
           backend:
             serviceName: {{ .Values.name.api }}
             servicePort: {{ .Values.port.api }}
-        - path: /socket.io
-          backend:
-            serviceName: {{ .Values.name.api }}
-            servicePort: {{ .Values.port.ws }}
 ---
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
@@ -32,4 +28,4 @@ spec:
         - path: /
           backend:
             serviceName: {{ .Values.name.ui }}
-            servicePort: 80
+            servicePort: 8080

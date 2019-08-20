@@ -8,7 +8,6 @@ replicas:
 
 port:
   api: 7000
-  ws: 7001
 
 fs:
   claimName:
@@ -23,11 +22,11 @@ app:
   host: jmp.castive.dev
 
 image:
-  repository: core.harbor.castive.dev/jmp
+  repository: docker.castive.dev/jmp
   image:
     api: api
     ui: ui
   tag:
-    api: 0.4.11
-    ui: 0.4.11
+    api: latest
+    ui: latest
   pullSecret: regcred
