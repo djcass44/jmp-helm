@@ -13,10 +13,10 @@ spec:
         app: {{ .Values.name.api }}
     spec:
       automountServiceAccountToken: false
-      #securityContext:
-      #  fsGroup: 1000
-      #  runAsUser: 1000
-      #  runAsGroup: 1000
+      securityContext:
+        fsGroup: 100
+        runAsUser: 100
+        runAsGroup: 101
       {{ if .Values.fs.claimName.api }}
       volumes:
       - name: data
@@ -30,29 +30,38 @@ spec:
         - name: DRIVER_URL
           value: {{ .Values.db.url }}
         - name: DRIVER_USER
-          valueFrom:
-            secretKeyRef:
-              name: jmp-db
-              key: username
+          value: {{ .Values.db.user }}
         - name: DRIVER_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: jmp-db
-              key: password
+          value: {{ .Values.db.password }}
         - name: BASE_URL
           value: {{ .Values.app.url }}
+        - name: LOG_ENABLED
+          value: {{ .Values.log.enabled | quote }}
         - name: LOG_DIRECTORY
-          value: "/data"
+          value: {{ .Values.log.directory }}
         - name: JMP_HOME
-          value: "/data"
-        image: "{{ .Values.image.repository }}/{{ .Values.image.image.api }}:{{ .Values.image.tag.api }}"
+          value: {{ .Values.fs.home }}
+        - name: JMP_ALLOW_ERROR_INFO
+          value: {{ .Values.app.errorInfo | quote }}
+        - name: CASE_SENSITIVE
+          value: {{ .Values.app.case | quote }}
+        - name: PORT
+          value: {{ .Values.port.api | quote }}
+        - name: KEY_REALM
+          value: {{ .Values.key.realm }}
+        - name: KEY_AWS_SSM_NAME
+          value: {{ .Values.key.aws.name }}
+        - name: FAV2_URL
+          value: {{ .Values.app.fav2.url }}
+        image: "djcass44/jmp:{{ .Values.image.api }}"
         imagePullPolicy: Always
         name: {{ .Values.name.api }}
         ports:
         - containerPort: {{ .Values.port.api }}
+          name: http
         {{ if .Values.fs.claimName.api }}
         volumeMounts:
-        - mountPath: "/data"
+        - mountPath: {{ .Values.fs.home }}
           name: data
         {{ end }}
         readinessProbe:
@@ -69,8 +78,6 @@ spec:
               - all
           readOnlyRootFilesystem: true
           allowPrivilegeEscalation: false
-      imagePullSecrets:
-      - name: {{ .Values.image.pullSecret }}
       restartPolicy: Always
 ---
 apiVersion: apps/v1
@@ -93,19 +100,35 @@ spec:
         app: {{ .Values.name.ui }}
     spec:
       automountServiceAccountToken: false
-      # securityContext:
-      #   fsGroup: 1000
-      #   runAsUser: 1000
-      #   runAsGroup: 1000
+      securityContext:
+        fsGroup: 100
+        runAsUser: 101
+        runAsGroup: 101
       volumes:
       - name: tmp
         emptyDir: {}  
       containers:
-      - image: "{{ .Values.image.repository }}/{{ .Values.image.image.ui }}:{{ .Values.image.tag.ui }}"
+      - image: "djcass44/jmp-ui:{{ .Values.image.ui }}"
         imagePullPolicy: Always
         name: {{ .Values.name.ui }}
+        env:
+          - name: JMP_API_URL
+            value: {{ .Values.app.host }}
+          - name: JMP_API_SECURE
+            value: {{ .Values.app.secure | quote }}
+          {{- with .Values.app.brand }}
+          - name: JMP_BRAND_NAME
+            value: {{ .name }}
+          - name: JMP_BRAND_MSG
+            value: {{ .msg }}
+          - name: JMP_BRAND_NOUN
+            value: {{ .noun }}
+          - name: JMP_BRAND_KEY
+            value: {{ .key }}
+          {{- end }}
         ports:
-        - containerPort: 80
+        - containerPort: 8080
+          name: http
         volumeMounts:
         - name: tmp
           mountPath: /var/tmp/nginx
@@ -130,8 +153,5 @@ spec:
             # add:
               # - CHOWN
               # - FOWNER
-          readOnlyRootFilesystem: false # this should be true
           allowPrivilegeEscalation: false
-      imagePullSecrets:
-      - name: {{ .Values.image.pullSecret }}
       restartPolicy: Always

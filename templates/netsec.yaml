@@ -10,7 +10,9 @@ spec:
   - from:
       - podSelector:
           matchLabels:
-            app: traefik
+            {{- range $key, $val := .Values.netsec.source }}
+            {{ $key }}: {{ $val }}
+            {{- end}}
     ports:
     - protocol: TCP
       port: {{ .Values.port.api }}
@@ -32,7 +34,9 @@ spec:
   - from:
       - podSelector:
           matchLabels:
-            app: traefik
+            {{- range $key, $val := .Values.netsec.source }}
+            {{ $key }}: {{ $val }}
+            {{- end}}
     ports:
     - protocol: TCP
       port: 8080

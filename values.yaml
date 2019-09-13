@@ -10,23 +10,52 @@ port:
   api: 7000
 
 fs:
+  home: "/data"
   claimName:
-    api: django-jmp
+    api: jmp
 
 db:
   driver: org.sqlite.JDBC
   url: jdbc:sqlite:/data/data.db
+  user: ""
+  password: ""
+
+log:
+  enabled: true
+  directory: ""
 
 app:
   url: https://jmp.castive.dev
   host: jmp.castive.dev
+  secure: true
+  # allow error type information in UI
+  errorInfo: true
+  # check jump case
+  case: false
+  # configuration of fav2 (https://github.com/djcass44/fav2)
+  fav2:
+    url: ""
+  # custom branding
+  brand:
+    name: JMP
+    msg: ""
+    noun: Jump
+    key: jmp
+
+# configuration of the JWT encryption key
+key:
+  # source of the key ('java' or 'aws-ssm')
+  realm: java
+  aws:
+    # name of the AWS ParameterStore parameter to use
+    name: ""
 
 image:
-  repository: docker.castive.dev/jmp
-  image:
-    api: api
-    ui: ui
-  tag:
-    api: latest
-    ui: latest
-  pullSecret: regcred
+  api: latest
+  ui: latest
+
+# network policy
+netsec:
+  # label to allow traffic from
+  source:
+    app: traefik
