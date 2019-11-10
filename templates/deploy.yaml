@@ -2,6 +2,13 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Values.name.api }}
+  labels:
+    app.kubernetes.io/name: {{ .Chart.Name }}
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+    app.kubernetes.io/component: api
 spec:
   replicas: {{ .Values.replicas.api }}
   selector:
@@ -17,57 +24,53 @@ spec:
         fsGroup: 100
         runAsUser: 100
         runAsGroup: 101
-      {{ if .Values.fs.claimName.api }}
       volumes:
+      {{ if .Values.claimName }}
       - name: data
         persistentVolumeClaim:
-          claimName: {{ .Values.fs.claimName.api }}
+          claimName: {{ .Values.claimName }}
       {{ end }}
+      - name: tmp
+        emptyDir: {}
       containers:
       - env:
-        - name: DRIVER_CLASS
-          value: {{ .Values.db.driver }}
-        - name: DRIVER_URL
-          value: {{ .Values.db.url }}
-        - name: DRIVER_USER
-          value: {{ .Values.db.user }}
-        - name: DRIVER_PASSWORD
-          value: {{ .Values.db.password }}
-        - name: BASE_URL
-          value: {{ .Values.app.url }}
-        - name: LOG_ENABLED
-          value: {{ .Values.log.enabled | quote }}
-        - name: LOG_DIRECTORY
-          value: {{ .Values.log.directory }}
-        - name: JMP_HOME
-          value: {{ .Values.fs.home }}
-        - name: JMP_ALLOW_ERROR_INFO
-          value: {{ .Values.app.errorInfo | quote }}
-        - name: CASE_SENSITIVE
-          value: {{ .Values.app.case | quote }}
-        - name: PORT
-          value: {{ .Values.port.api | quote }}
+        {{- range $key, $value := .Values.db }}
+        - name: {{ $key }}
+          value:  {{ $value | quote }}
+        {{- end }}
+        {{- range $key, $value := .Values.ssl }}
+        - name: {{ $key }}
+          value:  {{ $value | quote }}
+        {{- end }}
+        {{- range $key, $value := .Values.env }}
+        - name: {{ $key }}
+          value:  {{ $value | quote }}
+        {{- end }}
         - name: KEY_REALM
           value: {{ .Values.key.realm }}
+        {{ if eq .Values.key.realm "aws-ssm" }}
         - name: KEY_AWS_SSM_NAME
           value: {{ .Values.key.aws.name }}
-        - name: FAV2_URL
-          value: {{ .Values.app.fav2.url }}
-        image: "djcass44/jmp:{{ .Values.image.api }}"
-        imagePullPolicy: Always
+        {{ end }}
+        image: "{{ .Values.images.api.repository }}:{{ .Values.images.api.tag }}"
+        imagePullPolicy: {{ .Values.images.api.pullPolicy }}
         name: {{ .Values.name.api }}
         ports:
-        - containerPort: {{ .Values.port.api }}
+        - containerPort: {{ .Values.env.PORT }}
           name: http
-        {{ if .Values.fs.claimName.api }}
         volumeMounts:
-        - mountPath: {{ .Values.fs.home }}
+        - mountPath: /tmp
+          name: tmp
+        {{ if .Values.claimName }}
+        - mountPath: {{ .Values.env.JMP_HOME | quote }}
           name: data
         {{ end }}
+        resources:
+{{ toYaml .Values.resources | indent 10 }}
         readinessProbe:
           httpGet:
             path: /api/v3/health
-            port: {{ .Values.port.api }}
+            port: {{ .Values.env.PORT }}
           initialDelaySeconds: 5
           periodSeconds: 5
         securityContext:
@@ -84,6 +87,13 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Values.name.ui }}
+  labels:
+    app.kubernetes.io/name: {{ .Chart.Name }}
+    helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+    app.kubernetes.io/component: ui
 spec:
   replicas: {{ .Values.replicas.ui }}
   strategy:
@@ -108,15 +118,15 @@ spec:
       - name: tmp
         emptyDir: {}  
       containers:
-      - image: "djcass44/jmp-ui:{{ .Values.image.ui }}"
-        imagePullPolicy: Always
+      - image: "{{ .Values.images.ui.repository }}:{{ .Values.images.ui.tag }}"
+        imagePullPolicy: {{ .Values.images.ui.pullPolicy }}
         name: {{ .Values.name.ui }}
         env:
           - name: JMP_API_URL
-            value: {{ .Values.app.host }}
+            value: {{ index .Values.ingress.hosts 0 }}
           - name: JMP_API_SECURE
-            value: {{ .Values.app.secure | quote }}
-          {{- with .Values.app.brand }}
+            value: "true"
+          {{- with .Values.brand }}
           - name: JMP_BRAND_NAME
             value: {{ .name }}
           - name: JMP_BRAND_MSG
@@ -132,6 +142,13 @@ spec:
         volumeMounts:
         - name: tmp
           mountPath: /var/tmp/nginx
+        resources:
+          requests:
+            memory: 3Mi
+            cpu: 10m
+          limits:
+            memory: 10Mi
+            cpu: 50m
         livenessProbe:
           httpGet:
             path: /probe
@@ -147,11 +164,5 @@ spec:
         securityContext:
           runAsNonRoot: true
           privileged: false
-          # capabilities:
-            # drop:
-              # - all
-            # add:
-              # - CHOWN
-              # - FOWNER
           allowPrivilegeEscalation: false
       restartPolicy: Always

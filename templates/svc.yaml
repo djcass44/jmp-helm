@@ -9,8 +9,8 @@ spec:
   sessionAffinity: "ClientIP"
   ports:
   - name: http
-    port: {{ .Values.port.api }}
-    targetPort: {{ .Values.port.api }}
+    port: {{ .Values.env.PORT }}
+    targetPort: {{ .Values.env.PORT }}
   selector:
     app: {{ .Values.name.api }}
 ---

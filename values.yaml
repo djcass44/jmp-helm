@@ -6,41 +6,47 @@ replicas:
   api: 1
   ui: 2
 
-port:
-  api: 7000
+# PVC to use
+claimName: jmp
 
-fs:
-  home: "/data"
-  claimName:
-    api: jmp
+resources:
+  requests:
+    memory: 150Mi
+    cpu: 100m
+  limits:
+    memory: 350Mi
+    cpu: 200m
 
+# database configuration
 db:
-  driver: org.sqlite.JDBC
-  url: jdbc:sqlite:/data/data.db
-  user: ""
-  password: ""
+  DRIVER_URL: jdbc:sqlite:/data/data.db
+  DRIVER_CLASS: org.sqlite.JDBC
+  DRIVER_USER: ""
+  DRIVER_PASSWORD: ""
+# ssl configuration
+ssl:
+  JMP_HTTP_SECURE: false
+  JMP_HTTP2: true
+  JMP_SSL_KEYSTORE: "/data/keystore.jks"
+  JMP_SSL_PASSWORD: password
+# arbitrary environment variables to inject to the API pod
+# this can be extended
+env:
+  BASE_URL: https://jmp.castive.dev
+  JMP_HOME: "/data"
+  JMP_ALLOW_ERROR_INFO: true
+  JMP_ALLOW_EGRESS: true
+  JMP_CASE_SENSITIVE: false
+  PORT: 7000
+  LOG_ENABLED: true
+  FAV2_URL: https://icon.jmp.castive.dev
 
-log:
-  enabled: true
-  directory: ""
-
-app:
-  url: https://jmp.castive.dev
-  host: jmp.castive.dev
-  secure: true
-  # allow error type information in UI
-  errorInfo: true
-  # check jump case
-  case: false
-  # configuration of fav2 (https://github.com/djcass44/fav2)
-  fav2:
-    url: ""
-  # custom branding
-  brand:
-    name: JMP
-    msg: ""
-    noun: Jump
-    key: jmp
+# custom branding for UI
+brand:
+  name: JMP
+  msg: ""
+  noun: Jump
+  key: jmp
 
 # configuration of the JWT encryption key
 key:
@@ -50,12 +56,30 @@ key:
     # name of the AWS ParameterStore parameter to use
     name: ""
 
-image:
-  api: latest
-  ui: latest
+images:
+  api:
+    repository: "docker.io/djcass44/jmp"
+    tag: latest
+    pullPolicy: Always
+  ui:
+    repository: "docker.io/djcass44/jmp-ui"
+    tag: latest
+    pullPolicy: Always
+
+ingress:
+  enabled: true
+  hosts:
+    - jmp.castive.dev
+    - jmp.dcas.dev
+  # enforce HTTPS using HSTS (recommended)
+  hsts: false
+
 
 # network policy
 netsec:
+  enabled: false
   # label to allow traffic from
   source:
     app: traefik
+  namespace:
+    dev.dcas.netsec/name: kube-system
