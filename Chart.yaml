@@ -1,6 +1,6 @@
 apiVersion: v1
-appVersion: "0.5"
+appVersion: "0.5.1"
 description: JMP Chart for Kubernetes
 name: jmp-helm
-version: 0.2.4
+version: 0.3.0
 icon: https://jmp.castive.dev/favicon.png

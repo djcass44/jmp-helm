@@ -19,16 +19,16 @@ resources:
 
 # database configuration
 db:
-  DRIVER_URL: jdbc:sqlite:/data/data.db
-  DRIVER_CLASS: org.sqlite.JDBC
-  DRIVER_USER: ""
-  DRIVER_PASSWORD: ""
+  JMP_DATABASE_URL: jdbc:sqlite:/data/data.db
+  JMP_DATABASE_DRIVERCLASS: org.sqlite.JDBC
+  JMP_DATABASE_USERNAME: ""
+  JMP_DATABASE_PASSWORD: ""
 # ssl configuration
 ssl:
-  JMP_HTTP_SECURE: false
-  JMP_HTTP2: true
-  JMP_SSL_KEYSTORE: "/data/keystore.jks"
-  JMP_SSL_PASSWORD: password
+  JMP_SERVER_SSL: false
+  JMP_SERVER_HTTP2: true
+  JMP_SERVER_KEYSTORE: "/data/keystore.jks"
+  JMP_SERVER_KEYSTOREPASSWORD: password
 # arbitrary environment variables to inject to the API pod
 # this can be extended
 env:
