@@ -17,15 +17,13 @@ metadata:
     {{ end }}
 spec:
   rules:
-  {{- range .Values.ingress.hosts }}
-  - host: {{ . }}
+  - host: {{ .Values.ingress.host }}
     http:
       paths:
-        - path: /api 
+        - path: /api
           backend:
-            serviceName: {{ $.Values.name.api }}
-            servicePort: {{ $.Values.env.PORT }}
-  {{- end }}
+            serviceName: {{ .Values.name.api }}
+            servicePort: {{ .Values.env.SERVER_PORT }}
 {{- end }}
 ---
 {{- if .Values.netsec.enabled -}}
@@ -47,13 +45,11 @@ metadata:
     {{ end }}
 spec:
   rules:
-  {{- range .Values.ingress.hosts }}
-    - host: {{ . }}
+    - host: {{ .Values.ingress.host }}
       http:
         paths:
           - path: /
             backend:
               serviceName: {{ $.Values.name.ui }}
               servicePort: 8080
-  {{- end }}
 {{- end }}

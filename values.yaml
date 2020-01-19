@@ -6,9 +6,6 @@ replicas:
   api: 1
   ui: 2
 
-# PVC to use
-claimName: jmp
-
 resources:
   requests:
     memory: 150Mi
@@ -17,29 +14,18 @@ resources:
     memory: 350Mi
     cpu: 200m
 
-# database configuration
-db:
-  JMP_DATABASE_URL: jdbc:sqlite:/data/data.db
-  JMP_DATABASE_DRIVERCLASS: org.sqlite.JDBC
-  JMP_DATABASE_USERNAME: ""
-  JMP_DATABASE_PASSWORD: ""
-# ssl configuration
-ssl:
-  JMP_SERVER_SSL: false
-  JMP_SERVER_HTTP2: true
-  JMP_SERVER_KEYSTORE: "/data/keystore.jks"
-  JMP_SERVER_KEYSTOREPASSWORD: password
+
 # arbitrary environment variables to inject to the API pod
 # this can be extended
 env:
-  BASE_URL: https://jmp.castive.dev
-  JMP_HOME: "/data"
-  JMP_ALLOW_ERROR_INFO: true
-  JMP_ALLOW_EGRESS: true
-  JMP_CASE_SENSITIVE: false
-  PORT: 7000
-  LOG_ENABLED: true
-  FAV2_URL: https://icon.jmp.castive.dev
+  SPRING_DATASOURCE_URL: jdbc:postgresql://jmp-db:5432/jmp
+  SPRING_DATASOURCE_PASSWORD: password
+  SERVER_PORT: 7000
+  JMP_SECURITY_BASE_URL: https://jmp.castive.dev
+  SECURITY_JWT_SECRETKEY: password
+  SECURITY_OAUTH2_GITHUB_CALLBACKURL: https://jmp.castive.dev/callback
+  SECURITY_OAUTH2_GITHUB_CLIENTID: 1234
+  SECURITY_OAUTH2_GITHUB_CLIENTSECRET: 12345
 
 # custom branding for UI
 brand:
@@ -47,14 +33,6 @@ brand:
   msg: ""
   noun: Jump
   key: jmp
-
-# configuration of the JWT encryption key
-key:
-  # source of the key ('java' or 'aws-ssm')
-  realm: java
-  aws:
-    # name of the AWS ParameterStore parameter to use
-    name: ""
 
 images:
   api:
@@ -68,9 +46,7 @@ images:
 
 ingress:
   enabled: true
-  hosts:
-    - jmp.castive.dev
-    - jmp.dcas.dev
+  host: jmp.castive.dev
   # enforce HTTPS using HSTS (recommended)
   hsts: false
 

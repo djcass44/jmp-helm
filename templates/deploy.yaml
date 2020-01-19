@@ -5,7 +5,6 @@ metadata:
   labels:
     app.kubernetes.io/name: {{ .Chart.Name }}
     helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
     app.kubernetes.io/component: api
@@ -34,43 +33,25 @@ spec:
         emptyDir: {}
       containers:
       - env:
-        {{- range $key, $value := .Values.db }}
-        - name: {{ $key }}
-          value:  {{ $value | quote }}
-        {{- end }}
-        {{- range $key, $value := .Values.ssl }}
-        - name: {{ $key }}
-          value:  {{ $value | quote }}
-        {{- end }}
         {{- range $key, $value := .Values.env }}
         - name: {{ $key }}
           value:  {{ $value | quote }}
         {{- end }}
-        - name: KEY_REALM
-          value: {{ .Values.key.realm }}
-        {{ if eq .Values.key.realm "aws-ssm" }}
-        - name: KEY_AWS_SSM_NAME
-          value: {{ .Values.key.aws.name }}
-        {{ end }}
         image: "{{ .Values.images.api.repository }}:{{ .Values.images.api.tag }}"
         imagePullPolicy: {{ .Values.images.api.pullPolicy }}
         name: {{ .Values.name.api }}
         ports:
-        - containerPort: {{ .Values.env.PORT }}
+        - containerPort: {{ .Values.env.SERVER_PORT }}
           name: http
         volumeMounts:
         - mountPath: /tmp
           name: tmp
-        {{ if .Values.claimName }}
-        - mountPath: {{ .Values.env.JMP_HOME | quote }}
-          name: data
-        {{ end }}
         resources:
 {{ toYaml .Values.resources | indent 10 }}
         readinessProbe:
           httpGet:
-            path: /api/v3/health
-            port: {{ .Values.env.PORT }}
+            path: /api/actuator/health
+            port: {{ .Values.env.SERVER_PORT }}
           initialDelaySeconds: 5
           periodSeconds: 5
         securityContext:
@@ -90,7 +71,6 @@ metadata:
   labels:
     app.kubernetes.io/name: {{ .Chart.Name }}
     helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
     app.kubernetes.io/component: ui
@@ -123,7 +103,7 @@ spec:
         name: {{ .Values.name.ui }}
         env:
           - name: JMP_API_URL
-            value: {{ index .Values.ingress.hosts 0 }}
+            value: {{ index .Values.ingress.host }}
           - name: JMP_API_SECURE
             value: "true"
           {{- with .Values.brand }}
@@ -144,10 +124,10 @@ spec:
           mountPath: /var/tmp/nginx
         resources:
           requests:
-            memory: 3Mi
+            memory: 8Mi
             cpu: 10m
           limits:
-            memory: 10Mi
+            memory: 16Mi
             cpu: 50m
         livenessProbe:
           httpGet:

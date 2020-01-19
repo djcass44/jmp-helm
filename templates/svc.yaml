@@ -6,11 +6,10 @@ metadata:
   name: {{ .Values.name.api }}
 spec:
   type: ClusterIP
-  sessionAffinity: "ClientIP"
   ports:
   - name: http
-    port: {{ .Values.env.PORT }}
-    targetPort: {{ .Values.env.PORT }}
+    port: {{ .Values.env.SERVER_PORT }}
+    targetPort: {{ .Values.env.SERVER_PORT }}
   selector:
     app: {{ .Values.name.api }}
 ---
