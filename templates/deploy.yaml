@@ -24,11 +24,6 @@ spec:
         runAsUser: 100
         runAsGroup: 101
       volumes:
-      {{ if .Values.claimName }}
-      - name: data
-        persistentVolumeClaim:
-          claimName: {{ .Values.claimName }}
-      {{ end }}
       - name: tmp
         emptyDir: {}
       containers:
@@ -50,7 +45,7 @@ spec:
 {{ toYaml .Values.resources | indent 10 }}
         readinessProbe:
           httpGet:
-            path: /api/actuator/health
+            path: /api/ping
             port: {{ .Values.env.SERVER_PORT }}
           initialDelaySeconds: 5
           periodSeconds: 5
